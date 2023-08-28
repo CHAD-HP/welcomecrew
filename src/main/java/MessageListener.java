@@ -4,7 +4,11 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 import java.util.Collections;
@@ -14,9 +18,12 @@ public class MessageListener extends ListenerAdapter
 {
     public static void main(String[] args)
     {
-        // args[0] would be the token (using an environment variable or config file is preferred for security)
-        // We don't need any intents for this bot. Slash commands work without any intents!
-        JDA jda = JDABuilder.createDefault("token")
+        if(args.length < 1) {
+            System.out.println("CAN NOT RUN WITHOUT TOKEN, APP FAILURE");
+            System.exit(1);
+        }
+
+        JDA jda = JDABuilder.createDefault(args[0])
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT)
                 .addEventListeners(new MessageListener())
                 .setActivity(Activity.playing("Type /ping"))
@@ -24,7 +31,8 @@ public class MessageListener extends ListenerAdapter
 
         // Sets the global command list to the provided commands (removing all others)
         jda.updateCommands().addCommands(
-                Commands.slash("내전", "내전 게임 인원을 모집합니다."),
+                Commands.slash("내전", "내전 게임 인원을 모집합니다.")
+                        .addOption(OptionType.STRING, "가나다", "라마바", true),
                 Commands.slash("일반", "일반 게임 인원을 모집합니다."),
                 Commands.slash("자랭", "자랭 게임 인원을 모집합니다.")
                         .setGuildOnly(true) // Ban command only works inside a guild
@@ -34,6 +42,8 @@ public class MessageListener extends ListenerAdapter
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event)
     {
+        System.out.println("ENENT NAME :: " + event.getName());
+        System.out.println(String.format("%s - %s", event.getFullCommandName(), event.getCommandString()));
         // make sure we handle the right command
         switch (event.getName()) {
             case "내전": {
